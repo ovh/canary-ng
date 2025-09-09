@@ -45,8 +45,10 @@ jobs:
     interval: 4
     query_type: read
     type: valkey
-    dsn: rediss://canary-ng-valkey:6380/0
+    host: canary-ng-valkey
     password: ***
+    port: 6380
+    tls: true
+    skip_verify: true
     key: canary_ng
     create: true
-    skip_verify: true
