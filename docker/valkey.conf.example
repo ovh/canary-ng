@@ -1,0 +1,9 @@
+save 60 1
+loglevel warning
+requirepass ***
+tls-cert-file /etc/tls/db.crt
+tls-key-file /etc/tls/db.key
+tls-ca-cert-dir /etc/ssl/certs
+tls-auth-clients optional
+port 6379
+tls-port 6380

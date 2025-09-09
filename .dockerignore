@@ -1,0 +1,6 @@
+*
+!Makefile
+!VERSION
+!.git
+!src
+!docker-entrypoint.sh

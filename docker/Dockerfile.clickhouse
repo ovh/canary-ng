@@ -1,0 +1,14 @@
+FROM clickhouse/clickhouse-server:24.12
+
+COPY tls/db.crt /etc/tls/db.crt
+COPY tls/db.key /etc/tls/db.key
+
+COPY clickhouse.conf /etc/clickhouse-server/config.d/tls.xml
+
+RUN chown clickhouse:clickhouse /etc/tls/db.crt \
+  && chown clickhouse:clickhouse /etc/tls/db.key \
+  && chmod 644 /etc/tls/db.crt \
+  && chmod 600 /etc/tls/db.key \
+  && cat /etc/tls/db.key /etc/tls/db.crt > /etc/tls/db.pem \
+  && chmod 600 /etc/tls/db.pem \
+  && chown clickhouse:clickhouse /etc/tls/db.pem

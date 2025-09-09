@@ -1,0 +1,192 @@
+---
+version: '3'
+
+services:
+
+  clickhouse:
+    container_name: canary-ng-clickhouse
+    env_file:
+      - ./docker/clickhouse.env
+    build:
+      context: docker
+      dockerfile: Dockerfile.clickhouse
+    image: clickhouse/clickhouse-server:24.12-tls
+    networks:
+      - canary-ng
+    ports:
+      - "8123:8123"
+      - "8443:8443"
+      - "9000:9000"
+      - "9440:9440"
+    volumes:
+      - canary-ng-clickhouse:/var/lib/clickhouse
+    restart: always
+
+  mongodb:
+    container_name: canary-ng-mongodb
+    command: "--config=/etc/mongodb.conf"
+    env_file:
+      - ./docker/mongodb.env
+    image: percona/percona-server-mongodb:7.0.15-tls
+    build:
+      context: docker
+      dockerfile: Dockerfile.mongodb
+    networks:
+      - canary-ng
+    ports:
+      - "27017:27017"
+    volumes:
+      - canary-ng-mongodb:/var/lib/mongodb
+    restart: always
+
+  mysql:
+    container_name: canary-ng-mysql
+    build:
+      context: docker
+      dockerfile: Dockerfile.mysql
+    image: percona/percona-server:8.4-tls
+    env_file:
+      - ./docker/mysql.env
+    networks:
+      - canary-ng
+    ports:
+      - "3306:3306"
+    volumes:
+      - canary-ng-mysql:/var/lib/mysql
+    restart: always
+
+  postgresql:
+    container_name: canary-ng-postgresql
+    build:
+      context: docker
+      dockerfile: Dockerfile.postgresql
+    image: postgres:17-alpine-tls
+    env_file:
+      - ./docker/postgresql.env
+    command: "-c 'config_file=/etc/postgresql/postgresql.conf'"
+    networks:
+      - canary-ng
+    ports:
+      - "5432:5432"
+    volumes:
+      - canary-ng-postgresql:/var/lib/postgresql/data
+    restart: always
+
+  valkey:
+    container_name: canary-ng-valkey
+    build:
+      context: docker
+      dockerfile: Dockerfile.valkey
+    image: valkey/valkey:8.0-alpine-tls
+    networks:
+      - canary-ng
+    ports:
+      - "6379:6379"
+      - "6380:6380"
+    volumes:
+      - canary-ng-valkey:/data
+    command: valkey-server /usr/local/etc/valkey/valkey.conf
+    restart: always
+
+  consul:
+    container_name: canary-ng-consul
+    image: hashicorp/consul:1.20
+    networks:
+      - canary-ng
+    ports:
+      - "8400:8400"
+      - "8500:8500"
+      - "8600:8600"
+      - "8600:8600/udp"
+    command: "agent -server -ui -bootstrap-expect 1 -client 0.0.0.0 -node consul"
+
+  consul-mongodb-1:
+    container_name: canary-ng-consul-mongodb-1
+    image: hashicorp/consul:1.20
+    networks:
+      - canary-ng
+    command: "agent -retry-join consul -client 0.0.0.0 -node mongodb-1 -node-meta 'dbms_type:mongodb' -node-meta 'vip:vip-1'"
+
+  consul-mongodb-2:
+    container_name: canary-ng-consul-mongodb-2
+    image: hashicorp/consul:1.20
+    networks:
+      - canary-ng
+    command: "agent -retry-join consul -client 0.0.0.0 -node mongodb-2 -node-meta 'dbms_type:mongodb' -node-meta 'vip:vip-1'"
+
+  consul-mongodb-3:
+    container_name: canary-ng-consul-mongodb-3
+    image: hashicorp/consul:1.20
+    networks:
+      - canary-ng
+    command: "agent -retry-join consul -client 0.0.0.0 -node mongodb-3 -node-meta 'dbms_type:mongodb' -node-meta 'vip:vip-2' -node-meta 'vip_pub:vip-2-pub'"
+
+  consul-mongodb-4:
+    container_name: canary-ng-consul-mongodb-4
+    image: hashicorp/consul:1.20
+    networks:
+      - canary-ng
+    command: "agent -retry-join consul -client 0.0.0.0 -node mongodb-4 -node-meta 'dbms_type:mongodb' -node-meta 'vip:vip-2' -node-meta 'vip_pub:vip-2-pub'"
+
+  prometheus:
+    container_name: canary-ng-prometheus
+    image: prom/prometheus:v3.4.1
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    volumes:
+      - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - canary-ng-prometheus:/prometheus
+    networks:
+      - canary-ng
+    ports:
+      - "9091:9090"
+
+  grafana:
+    image: grafana/grafana:12.0.2
+    container_name: canary-ng-grafana
+    networks:
+      - canary-ng
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    env_file:
+      - ./docker/grafana.env
+    volumes:
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning
+      - ./docker/grafana/dashboards:/var/lib/grafana/dashboards
+
+  canary-ng:
+    container_name: canary-ng
+    image: canary-ng:latest
+    build:
+      context: .
+    volumes:
+      - './canary-ng.yaml:/etc/canary-ng.yaml:ro'
+    networks:
+      - canary-ng
+    ports:
+      - "8080:8080"
+
+
+volumes:
+  canary-ng-mongodb:
+    driver: local
+
+  canary-ng-clickhouse:
+    driver: local
+
+  canary-ng-valkey:
+    driver: local
+
+  canary-ng-postgresql:
+    driver: local
+
+  canary-ng-mysql:
+    driver: local
+
+  canary-ng-prometheus:
+    driver: local
+
+
+networks:
+  canary-ng:

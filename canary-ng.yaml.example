@@ -1,0 +1,52 @@
+---
+buckets:
+- 0.01
+- 0.05
+- 0.25
+- 1
+- 2
+jobs:
+  - name: mongodb_ro
+    type: mongodb
+    dsn: "mongodb://canary-ng-mongodb:27017/canary_mongodb?tls=true&tlsInsecure=true"
+    username: canary
+    password: ***
+    database: canary_mongodb
+    collection: canary_ng
+    interval: 4
+    query_type: read
+    create: true
+
+  - name: clickhouse_ro
+    interval: 4
+    query_type: read
+    type: clickhouse
+    dsn: "clickhouse://canary:***@canary-ng-clickhouse:9440/canary_clickhouse?secure=true&skip_verify=true"
+    table: canary_ng
+    create: true
+
+  - name: postgresql_ro
+    interval: 4
+    query_type: read
+    type: postgresql
+    dsn: "postgres://canary:***@canary-ng-postgresql:5432/canary_postgresql?sslmode=require"
+    table: canary_ng
+    create: true
+
+  - name: mysql_ro
+    interval: 4
+    query_type: read
+    type: mysql
+    dsn: "canary:***@tcp(canary-ng-mysql:3306)/canary_mysql?tls=skip-verify"
+    table: canary_ng
+    create: true
+
+  - name: valkey_ro
+    interval: 4
+    query_type: read
+    type: valkey
+    dsn: rediss://canary-ng-valkey:6380/0
+    password: ***
+    key: canary_ng
+    create: true
+    skip_verify: true

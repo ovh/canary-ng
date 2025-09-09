@@ -1,0 +1,5 @@
+bin
+canary-ng.yaml
+docker/*.env
+docker/tls
+docker/valkey.conf

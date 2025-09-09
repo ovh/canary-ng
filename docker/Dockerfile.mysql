@@ -1,0 +1,15 @@
+FROM percona/percona-server:8.4
+
+COPY tls/db.crt /etc/tls/db.crt
+COPY tls/db.key /etc/tls/db.key
+
+COPY my.cnf /etc/mysql/my.cnf
+
+USER root
+
+RUN chown mysql:mysql /etc/tls/db.crt \
+  && chown mysql:mysql /etc/tls/db.key \
+  && chmod 644 /etc/tls/db.crt \
+  && chmod 600 /etc/tls/db.key
+
+USER mysql
