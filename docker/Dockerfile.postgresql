@@ -1,0 +1,12 @@
+from postgres:17-alpine
+
+COPY tls/db.crt /etc/tls/db.crt
+COPY tls/db.key /etc/tls/db.key
+
+COPY postgresql.conf /etc/postgresql/postgresql.conf
+COPY pg_hba.conf /etc/postgresql/pg_hba.conf
+
+RUN chown postgres:postgres /etc/tls/db.crt \
+  && chown postgres:postgres /etc/tls/db.key \
+  && chmod 644 /etc/tls/db.crt \
+  && chmod 600 /etc/tls/db.key

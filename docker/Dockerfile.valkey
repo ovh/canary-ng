@@ -1,0 +1,11 @@
+FROM valkey/valkey:8.0-alpine
+
+COPY tls/db.crt /etc/tls/db.crt
+COPY tls/db.key /etc/tls/db.key
+
+COPY valkey.conf /usr/local/etc/valkey/valkey.conf
+
+RUN chown valkey:valkey /etc/tls/db.crt \
+  && chown valkey:valkey /etc/tls/db.key \
+  && chmod 644 /etc/tls/db.crt \
+  && chmod 600 /etc/tls/db.key

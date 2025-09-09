@@ -1,0 +1,18 @@
+FROM percona/percona-server-mongodb:7.0.15
+
+COPY tls/db.crt /etc/tls/db.crt
+COPY tls/db.key /etc/tls/db.key
+
+COPY mongodb.conf /etc/mongodb.conf
+
+USER root
+
+RUN chown 1001:1001 /etc/tls/db.crt \
+  && chown 1001:1001 /etc/tls/db.key \
+  && chmod 644 /etc/tls/db.crt \
+  && chmod 600 /etc/tls/db.key \
+  && cat /etc/tls/db.key /etc/tls/db.crt > /etc/tls/db.pem \
+  && chmod 600 /etc/tls/db.pem \
+  && chown 1001:1001 /etc/tls/db.pem
+
+USER 1001

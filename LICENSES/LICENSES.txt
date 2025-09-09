@@ -1,0 +1,64 @@
+Licences:
+Apache-2.0
+BSD-2-Clause
+BSD-3-Clause
+MIT
+MPL-2.0
+
+Packages:
+filippo.io/edwards25519; BSD-3-Clause
+github.com/ClickHouse/ch-go; Apache-2.0
+github.com/ClickHouse/clickhouse-go/v2; Apache-2.0
+github.com/andybalholm/brotli; MIT
+github.com/armon/go-metrics; MIT
+github.com/beorn7/perks; MIT
+github.com/cespare/xxhash/v2; MIT
+github.com/fatih/color; MIT
+github.com/go-faster/city; MIT
+github.com/go-faster/errors; BSD-3-Clause
+github.com/go-sql-driver/mysql; MPL-2.0
+github.com/golang/go; BSD-3-Clause
+github.com/golang/snappy; BSD-3-Clause
+github.com/google/uuid; BSD-3-Clause
+github.com/hashicorp/consul/api; MPL-2.0
+github.com/hashicorp/errwrap; MPL-2.0
+github.com/hashicorp/go-cleanhttp; MPL-2.0
+github.com/hashicorp/go-hclog; MIT
+github.com/hashicorp/go-immutable-radix; MPL-2.0
+github.com/hashicorp/go-multierror; MPL-2.0
+github.com/hashicorp/go-rootcerts; MPL-2.0
+github.com/hashicorp/golang-lru; MPL-2.0
+github.com/hashicorp/serf; MPL-2.0
+github.com/jackc/pgpassfile; MIT
+github.com/jackc/pgservicefile; MIT
+github.com/jackc/pgx/v5; MIT
+github.com/klauspost/compress; Apache-2.0
+github.com/mattn/go-colorable; MIT
+github.com/mattn/go-isatty; MIT
+github.com/mitchellh/mapstructure; MIT
+github.com/montanaflynn/stats; MIT
+github.com/munnerz/goautoneg; BSD-3-Clause
+github.com/paulmach/orb; MIT
+github.com/pierrec/lz4/v4; BSD-3-Clause
+github.com/pkg/errors; BSD-2-Clause
+github.com/prometheus/client_golang; Apache-2.0
+github.com/prometheus/client_model; Apache-2.0
+github.com/prometheus/common; Apache-2.0
+github.com/prometheus/procfs; Apache-2.0
+github.com/segmentio/asm; MIT
+github.com/shopspring/decimal; MIT
+github.com/valkey-io/valkey-go; Apache-2.0
+github.com/xdg-go/pbkdf2; Apache-2.0
+github.com/xdg-go/scram; Apache-2.0
+github.com/xdg-go/stringprep; Apache-2.0
+github.com/youmark/pkcs8; MIT
+go.mongodb.org/mongo-driver; Apache-2.0
+go.opentelemetry.io/otel/trace; Apache-2.0
+go.opentelemetry.io/otel; Apache-2.0
+golang.org/x/crypto; BSD-3-Clause
+golang.org/x/exp; BSD-3-Clause
+golang.org/x/sync; BSD-3-Clause
+golang.org/x/sys; BSD-3-Clause
+golang.org/x/text; BSD-3-Clause
+google.golang.org/protobuf; BSD-3-Clause
+gopkg.in/yaml.v3; Apache-2.0
