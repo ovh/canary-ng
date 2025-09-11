@@ -273,6 +273,7 @@ func DiscoverHosts(config DiscoveryConfig) (hosts []string, err error) {
 			Addresses:   config.Addresses,
 			Datacenter:  config.Datacenter,
 			Scheme:      config.Scheme,
+			Token:       config.Token,
 			SkipVerify:  config.SkipVerify,
 			NodeMeta:    config.NodeMeta,
 			ReturnMeta:  config.ReturnMeta,
