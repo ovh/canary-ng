@@ -1,8 +1,8 @@
 module github.com/ovh/canary-ng
 
-go 1.23.0
+go 1.24.0
 
-toolchain go1.23.1
+toolchain go1.24.1
 
 require (
 	github.com/ClickHouse/clickhouse-go/v2 v2.36.0
@@ -10,7 +10,7 @@ require (
 	github.com/hashicorp/consul/api v1.31.0
 	github.com/jackc/pgx/v5 v5.7.2
 	github.com/prometheus/client_golang v1.20.5
-	github.com/valkey-io/valkey-go v1.0.51
+	github.com/valkey-io/valkey-go v1.0.64
 	go.mongodb.org/mongo-driver v1.17.1
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -62,7 +62,7 @@ require (
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56 // indirect
 	golang.org/x/net v0.41.0 // indirect
 	golang.org/x/sync v0.15.0 // indirect
-	golang.org/x/sys v0.33.0 // indirect
+	golang.org/x/sys v0.36.0 // indirect
 	golang.org/x/text v0.26.0 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
 )
