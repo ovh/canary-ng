@@ -55,7 +55,7 @@ type JobConfig struct {
 	AuthMechanism        string            `yaml:"auth_mechanism"`
 	Collection           string            `yaml:"collection"`
 	Table                string            `yaml:"table"`
-	Replicated           bool              `yaml:"replicated"`
+	Cluster              string            `yaml:"cluster"`
 	Key                  string            `yaml:"key"`
 	Create               bool              `yaml:"create"`
 	Secure               bool              `yaml:"secure"`

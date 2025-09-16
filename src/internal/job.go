@@ -150,7 +150,7 @@ func NewJob(config JobConfig, metrics *Metrics, queryLabels QueryLabelsConfig, j
 			Database:   config.Database,
 			Table:      config.Table,
 			Create:     config.Create,
-			Replicated: config.Replicated,
+			Cluster:    config.Cluster,
 			Secure:     config.Secure,
 			SkipVerify: config.SkipVerify,
 			Logger:     logger,
