@@ -143,6 +143,7 @@ func NewJob(config JobConfig, metrics *Metrics, queryLabels QueryLabelsConfig, j
 		d, err = driver.NewClickhouse(driver.ClickhousebOpts{
 			DSN:        config.DSN,
 			Hosts:      config.Hosts,
+			Port:       config.Port,
 			Username:   config.Username,
 			Password:   config.Password,
 			Timeout:    config.Timeout,

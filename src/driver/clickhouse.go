@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"log/slog"
+	"strconv"
 	"strings"
 	"time"
 
@@ -20,6 +21,7 @@ const (
 type ClickhousebOpts struct {
 	DSN        string
 	Hosts      []string
+	Port       int
 	Database   string
 	Username   string
 	Password   string
@@ -72,7 +74,15 @@ func (c *Clickhouse) Connect() (err error) {
 	}
 
 	if len(c.opts.Hosts) > 0 {
-		opts.Addr = c.opts.Hosts
+		hosts := []string{}
+		for _, h := range c.opts.Hosts {
+			if !strings.Contains(h, ":") && c.opts.Port != 0 {
+				hosts = append(hosts, h+":"+strconv.Itoa(c.opts.Port))
+			} else {
+				hosts = append(hosts, h)
+			}
+		}
+		opts.Addr = hosts
 	}
 	if c.opts.Database != "" {
 		opts.Auth.Database = c.opts.Database

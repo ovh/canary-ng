@@ -52,6 +52,7 @@ openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:secp384r1 -days 3650 -no
 
 * `dsn` (string): connection string (ex: `clickhouse://***:***@127.0.0.1:9440/canary_clickhouse?secure=true&skip_verify=true`)
 * `hosts` ([]string): list of hosts
+* `port` (int): connect to this port
 * `username` (string): user name used for authentication
 * `password` (string): password used for authentication
 * `secure` (bool): use TLS for the connection
@@ -65,6 +66,7 @@ openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:secp384r1 -days 3650 -no
  * `dsn` (string): connection string (ex: `mongodb://127.0.0.1:27017/canary_mongodb?tls=true&tlsInsecure=true`)
  * `scheme` (string): scheme for the connection (`mongodb`, `mongodb+srv`)
  * `hosts` ([]string): list of hosts
+ * `port` (int): connect to this port
  * `username` (string): user name used for authentication
  * `password` (string): password used for authentication
  * `tls` (bool): use TLS for the connection
@@ -77,9 +79,9 @@ openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:secp384r1 -days 3650 -no
 
 * `dsn` (string): connection string (ex: `***:***@tcp(127.0.0.1:3306)/canary_mysql?tls=skip-verify`)
 * `host` (string): host address
+* `port` (int): connect to this port
 * `username` (string): user name used for authentication
 * `password` (string): password used for authentication
-* `port` (int): connect to this port
 * `tls_config` (string): use TLS for the connection (`false`, `true`, `skip-verify`, `preferred`)
 * `allow_native_passwords` (bool): allow to connect using the mysql_native_password authentication plugin
 * `database` (string): name of the database
