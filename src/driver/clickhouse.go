@@ -31,7 +31,7 @@ type ClickhousebOpts struct {
 	Logger     *slog.Logger
 	Table      string
 	Create     bool
-	Replicated bool
+	Cluster    string
 }
 
 type Clickhouse struct {
@@ -168,14 +168,47 @@ func (c *Clickhouse) insert() (err error) {
 }
 
 func (c *Clickhouse) createTable() (err error) {
-	c.logger.Debug("creating table")
-	engine := "ReplacingMergeTree"
-	if c.opts.Replicated {
-		engine = "ReplicatedReplacingMergeTree"
+	if c.opts.Cluster != "" {
+		if err = c.createReplicatedTable(); err != nil {
+			return err
+		}
+		if err = c.createDistributedTable(); err != nil {
+			return err
+		}
+		return nil
+	} else {
+		return c.createLocalTable()
+	}
+}
+
+func (c *Clickhouse) createLocalTable() (err error) {
+	c.logger.Debug("creating local table")
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.opts.Timeout)*time.Second)
+	defer cancel()
+	query := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (id int, ts DateTime64(3)) ENGINE ReplacingMergeTree ORDER BY id PRIMARY KEY id", c.opts.Table)
+	return c.conn.Exec(ctx, query)
+}
+
+func (c *Clickhouse) createReplicatedTable() (err error) {
+	c.logger.Debug("creating replicated table")
+	if c.opts.Cluster == "" {
+		return fmt.Errorf("cluster is not defined")
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.opts.Timeout)*time.Second)
 	defer cancel()
-	return c.conn.Exec(ctx, fmt.Sprintf("CREATE TABLE %s (id int, ts DateTime64(3)) ENGINE %s ORDER BY id PRIMARY KEY id", c.opts.Table, engine))
+	query := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s_chunk ON CLUSTER '%s' (id int, ts DateTime64(3)) ENGINE ReplicatedReplacingMergeTree ORDER BY id PRIMARY KEY id", c.opts.Table, c.opts.Cluster)
+	return c.conn.Exec(ctx, query)
+}
+
+func (c *Clickhouse) createDistributedTable() (err error) {
+	c.logger.Debug("creating distributed table")
+	if c.opts.Cluster == "" {
+		return fmt.Errorf("cluster is not defined")
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.opts.Timeout)*time.Second)
+	defer cancel()
+	query := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s ON CLUSTER '%s' (id int, ts DateTime64(3)) ENGINE Distributed('%s', '%s', %s_chunk, rand())", c.opts.Table, c.opts.Cluster, c.opts.Cluster, c.opts.Database, c.opts.Table)
+	return c.conn.Exec(ctx, query)
 }
 
 func (c *Clickhouse) Disconnect() (err error) {

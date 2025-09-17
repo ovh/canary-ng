@@ -53,6 +53,7 @@ openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:secp384r1 -days 3650 -no
 * `dsn` (string): connection string (ex: `clickhouse://***:***@127.0.0.1:9440/canary_clickhouse?secure=true&skip_verify=true`)
 * `hosts` ([]string): list of hosts
 * `port` (int): connect to this port
+* `cluster` (string): name of the cluster in a replicated setup
 * `username` (string): user name used for authentication
 * `password` (string): password used for authentication
 * `secure` (bool): use TLS for the connection
