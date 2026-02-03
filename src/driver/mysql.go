@@ -85,6 +85,11 @@ func (m *Mysql) Connect() error {
 		return err
 	}
 
+	// https://github.com/go-sql-driver/mysql?tab=readme-ov-file#important-settings
+	db.SetMaxOpenConns(1)
+	db.SetMaxIdleConns(1)
+	db.SetConnMaxLifetime(1 * time.Minute)
+
 	m.logger.Debug("ping")
 	err = db.Ping()
 	if err != nil {
