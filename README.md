@@ -120,12 +120,19 @@ openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:secp384r1 -days 3650 -no
 
 Canary NG is able to discover a list of hosts instead of defining `host` or `hosts` in each job configuration.
 
+Discovery runs periodically: hosts that appear are added and hosts that
+disappear are removed without restarting the application. Use `interval` to
+control how often discovery runs (defaults to 60 seconds). When discovery fails
+or returns no host, the currently running jobs are kept so a transient outage
+does not interrupt monitoring.
+
 Example:
 
 ```yaml
 jobs:
   host_discovery:
     type: consul
+    interval: 60
     token: ***
     node_meta:
       dbms_type: postgresql

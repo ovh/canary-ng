@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -15,6 +16,7 @@ import (
 
 const (
 	JOB_INTERVAL          = 1
+	DISCOVERY_INTERVAL    = 60
 	JOB_NAME_SEPARATOR    = "/"
 	JOB_TYPE_CLICKHOUSE   = "clickhouse"
 	JOB_TYPE_MONGODB      = "mongodb"
@@ -42,16 +44,31 @@ type Job struct {
 
 // Create multiple jobs
 func NewJobs(config JobConfig, metrics *Metrics, queryLabels QueryLabelsConfig, jobLabelName string) (jobs []*Job, err error) {
+	hosts, err := ResolveHosts(config)
+	if err != nil {
+		return nil, err
+	}
 
-	var hosts []string
+	jobMap, err := BuildJobs(config, hosts, metrics, queryLabels, jobLabelName)
+	if err != nil {
+		return nil, err
+	}
 
-	if config.Host != "" {
-		hosts = []string{config.Host}
+	jobs = make([]*Job, 0, len(jobMap))
+	for _, j := range jobMap {
+		jobs = append(jobs, j)
+	}
+	return jobs, nil
+}
 
-	} else if len(config.Hosts) > 0 {
-		hosts = config.Hosts
-
-	} else if config.HostsDiscovery.Type != "" {
+// Resolve the list of hosts a job targets, querying discovery when configured
+func ResolveHosts(config JobConfig) (hosts []string, err error) {
+	switch {
+	case config.Host != "":
+		return []string{config.Host}, nil
+	case len(config.Hosts) > 0:
+		return config.Hosts, nil
+	case config.HostsDiscovery.Type != "":
 		hosts, err = DiscoverHosts(config.HostsDiscovery)
 		if err != nil {
 			return nil, err
@@ -59,9 +76,17 @@ func NewJobs(config JobConfig, metrics *Metrics, queryLabels QueryLabelsConfig, 
 		if len(hosts) == 0 {
 			return nil, fmt.Errorf("0 host found by discovery")
 		}
-	} else if config.DSN == "" {
+		return hosts, nil
+	case config.DSN == "":
 		return nil, fmt.Errorf("host, hosts, hosts_discovery or dsn required for job %s", config.Name)
 	}
+	return nil, nil
+}
+
+// Build the jobs targeting the given hosts, keyed by a stable identity so a
+// supervisor can reconcile a running set against a freshly discovered one
+func BuildJobs(config JobConfig, hosts []string, metrics *Metrics, queryLabels QueryLabelsConfig, jobLabelName string) (map[string]*Job, error) {
+	jobs := map[string]*Job{}
 
 	if config.JobPerHost && len(hosts) > 0 {
 		for _, h := range hosts {
@@ -73,7 +98,7 @@ func NewJobs(config JobConfig, metrics *Metrics, queryLabels QueryLabelsConfig, 
 			if err != nil {
 				return nil, err
 			}
-			jobs = append(jobs, j)
+			jobs[h] = j
 			// Restore original name
 			config.Name = name
 		}
@@ -82,13 +107,19 @@ func NewJobs(config JobConfig, metrics *Metrics, queryLabels QueryLabelsConfig, 
 
 	config.Hosts = hosts
 	config.Name = AddHostPrefix(config)
-
 	j, err := NewJob(config, metrics, queryLabels, jobLabelName)
 	if err != nil {
 		return nil, err
 	}
+	jobs[hostsKey(hosts)] = j
+	return jobs, nil
+}
 
-	return []*Job{j}, nil
+// Stable key for a set of hosts, independent of discovery ordering
+func hostsKey(hosts []string) string {
+	sorted := append([]string{}, hosts...)
+	sort.Strings(sorted)
+	return strings.Join(sorted, ",")
 }
 
 // Add host prefix to the job name
@@ -406,17 +437,24 @@ func (j *Job) EndMeasurement(queryType string) {
 	j.IncrQueries()
 }
 
-func (j *Job) Run() {
+// Run measures on the job interval until stop is closed. A nil stop channel
+// runs for the lifetime of the process.
+func (j *Job) Run(stop <-chan struct{}) {
 	j.logger.Info("job started")
-	for {
-		j.Measure()
-		j.logger.Info("measurement performed")
+	j.Measure()
+	j.logger.Info("measurement performed")
 
-		w := "second"
-		if j.config.Interval > 1 {
-			w = "seconds"
+	ticker := time.NewTicker(time.Duration(j.config.Interval) * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-stop:
+			j.logger.Info("job stopped")
+			return
+		case <-ticker.C:
+			j.Measure()
+			j.logger.Info("measurement performed")
 		}
-		j.logger.Debug(fmt.Sprintf("waiting for %d %s before next measurement", j.config.Interval, w))
-		time.Sleep(time.Duration(j.config.Interval * int(time.Second)))
 	}
 }

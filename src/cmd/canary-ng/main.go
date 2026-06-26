@@ -95,13 +95,19 @@ func main() {
 	metrics := internal.NewMetrics(reg, config)
 
 	for _, jobConfig := range config.Jobs {
+		if jobConfig.HostsDiscovery.Type != "" {
+			sup := internal.NewSupervisor(jobConfig, metrics, config.QueryLabels, config.JobLabelName)
+			go sup.Run()
+			continue
+		}
+
 		jobs, err := internal.NewJobs(jobConfig, metrics, config.QueryLabels, config.JobLabelName)
 		if err != nil {
 			slog.Error("could not create job", slog.Any("job", jobConfig.Name), slog.Any("error", err))
 			continue
 		}
 		for _, j := range jobs {
-			go j.Run()
+			go j.Run(nil)
 		}
 	}
 
