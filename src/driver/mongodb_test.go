@@ -1,7 +1,6 @@
 package driver
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -20,7 +19,7 @@ func TestMongodbURI(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		t.Run(fmt.Sprintf(tc.name), func(t *testing.T) {
+		t.Run(tc.name, func(t *testing.T) {
 			m, err := NewMongodb(tc.input)
 			if err != nil {
 				t.Errorf("could not create mongodb: %v", err)
@@ -50,7 +49,7 @@ func TestMongodbTimeout(t *testing.T) {
 		{"with timeout", MongodbOpts{Timeout: 3, DSN: "mongodb://127.0.0.1:27017/canary", Database: "canary", Collection: "canary"}, 3}}
 
 	for _, tc := range tests {
-		t.Run(fmt.Sprintf(tc.name), func(t *testing.T) {
+		t.Run(tc.name, func(t *testing.T) {
 			m, err := NewMongodb(tc.input)
 			if err != nil {
 				t.Errorf("could not create mongodb: %v", err)
