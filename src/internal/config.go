@@ -70,6 +70,7 @@ type JobConfig struct {
 
 type DiscoveryConfig struct {
 	Type        string            `yaml:"type"`
+	Interval    int               `yaml:"interval"`
 	Addresses   []string          `yaml:"addresses"`
 	Datacenter  string            `yaml:"datacenter"`
 	Scheme      string            `yaml:"scheme"`

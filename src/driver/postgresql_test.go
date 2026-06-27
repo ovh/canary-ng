@@ -1,7 +1,6 @@
 package driver
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -24,7 +23,7 @@ func TestPostgresqlDSN(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		t.Run(fmt.Sprintf(tc.name), func(t *testing.T) {
+		t.Run(tc.name, func(t *testing.T) {
 			m, err := NewPostgresql(tc.input)
 			if err != nil {
 				t.Errorf("could not create postgresql: %v", err)
