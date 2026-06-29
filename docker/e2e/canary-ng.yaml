@@ -1,0 +1,99 @@
+---
+listen_addr: ":8080"
+route: /metrics
+log_level: info
+log_format: text
+jobs:
+  - name: postgresql
+    type: postgresql
+    interval: 1
+    query_type: read_write
+    job_per_host: true
+    hosts_discovery:
+      type: consul
+      addresses:
+        - consul:8500
+      interval: 2
+      node_meta:
+        driver: postgresql
+    port: 5432
+    username: canary
+    password: canary
+    database: canary
+    sslmode: disable
+    table: canary_ng
+    create: true
+
+  - name: mysql
+    type: mysql
+    interval: 1
+    query_type: read_write
+    job_per_host: true
+    hosts_discovery:
+      type: consul
+      addresses:
+        - consul:8500
+      interval: 2
+      node_meta:
+        driver: mysql
+    port: 3306
+    username: canary
+    password: canary
+    database: canary
+    table: canary_ng
+    create: true
+    allow_native_passwords: true
+
+  - name: mongodb
+    type: mongodb
+    interval: 1
+    query_type: read_write
+    job_per_host: true
+    hosts_discovery:
+      type: consul
+      addresses:
+        - consul:8500
+      interval: 2
+      node_meta:
+        driver: mongodb
+    username: canary
+    password: canary
+    auth_source: admin
+    database: canary
+    collection: canary_ng
+    create: true
+
+  - name: clickhouse
+    type: clickhouse
+    interval: 1
+    query_type: read_write
+    job_per_host: true
+    hosts_discovery:
+      type: consul
+      addresses:
+        - consul:8500
+      interval: 2
+      node_meta:
+        driver: clickhouse
+    port: 9000
+    username: canary
+    password: canary
+    database: canary
+    table: canary_ng
+    create: true
+
+  - name: valkey
+    type: valkey
+    interval: 1
+    query_type: read_write
+    job_per_host: true
+    hosts_discovery:
+      type: consul
+      addresses:
+        - consul:8500
+      interval: 2
+      node_meta:
+        driver: valkey
+    port: 6379
+    key: canary_ng
+    create: true

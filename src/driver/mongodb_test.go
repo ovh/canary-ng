@@ -1,8 +1,6 @@
 package driver
 
-import (
-	"testing"
-)
+import "testing"
 
 func TestMongodbURI(t *testing.T) {
 	tests := []struct {

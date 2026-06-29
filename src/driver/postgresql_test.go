@@ -1,8 +1,6 @@
 package driver
 
-import (
-	"testing"
-)
+import "testing"
 
 func TestPostgresqlDSN(t *testing.T) {
 	tests := []struct {
