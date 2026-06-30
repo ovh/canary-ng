@@ -149,3 +149,16 @@ jobs:
 * `node_meta` (map[string][string]): return list of nodes matching these node meta
 * `return_meta` (string): instead of returning the node IP address (by default), return the value of the node meta available on the node
 * `return_metas` ([]string): same as `return_meta` but with multiple values (`return_meta` is ignored if `return_metas` is configured)
+
+# Grafana dashboard
+
+A ready-to-use Grafana dashboard is provided at
+[`docker/grafana/dashboards/canary-ng.json`](docker/grafana/dashboards/canary-ng.json).
+It visualizes the Prometheus metrics exposed by Canary NG (latency histograms,
+failures, job and query counters).
+
+Import it into an existing Grafana instance:
+
+1. Open Grafana and go to **Dashboards** > **New** > **Import**.
+2. Upload `docker/grafana/dashboards/canary-ng.json` (or paste its content).
+3. Select a Prometheus data source scraping Canary NG and click **Import**.
