@@ -36,7 +36,7 @@ openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:secp384r1 -days 3650 -no
 ## Jobs
 
 * `name` (string): name of the job
-* `type` (string): name of the driver to use to perform queries (`clickhouse`, `mongodb`, `mysql`, `postgresql`, `valkey`)
+* `type` (string): name of the driver to use to perform queries (`clickhouse`, `etcd`, `mongodb`, `mysql`, `postgresql`, `valkey`)
 * `query_type` (string): type of queries to measure (`read`, `write`, `read_write`)
 * `hosts_discovery`: see "Host discovery" section
 * `timeout` (int): number of second(s) before returning an error
@@ -61,6 +61,17 @@ openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:secp384r1 -days 3650 -no
 * `database` (string): name of the database
 * `table` (string): name of the table
 * `create` (bool): create table if it doesn't exist (used by `read` queries)
+
+### Etcd
+
+* `hosts` ([]string): list of hosts
+* `port` (int): connect to this port. If not defined, use ports from the `hosts` list or 2379.
+* `username` (string): user name used for authentication
+* `password` (string): password used for authentication
+* `tls` (bool): use TLS for the connection
+* `skip_verify` (bool): skip verification of the TLS certificate
+* `key` (string): name of the key
+* `create` (bool): write to key if it doesn't exist (used by `read` queries)
 
 ### MongoDB
 

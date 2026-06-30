@@ -52,3 +52,13 @@ jobs:
     skip_verify: true
     key: canary_ng
     create: true
+
+  - name: etcd_ro
+    interval: 4
+    query_type: read
+    type: etcd
+    hosts:
+      - canary-ng-etcd
+    port: 2379
+    key: canary_ng
+    create: true

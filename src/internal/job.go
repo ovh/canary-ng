@@ -19,6 +19,7 @@ const (
 	DISCOVERY_INTERVAL    = 60
 	JOB_NAME_SEPARATOR    = "/"
 	JOB_TYPE_CLICKHOUSE   = "clickhouse"
+	JOB_TYPE_ETCD         = "etcd"
 	JOB_TYPE_MONGODB      = "mongodb"
 	JOB_TYPE_MYSQL        = "mysql"
 	JOB_TYPE_POSTGRESQL   = "postgresql"
@@ -183,6 +184,22 @@ func NewJob(config JobConfig, metrics *Metrics, queryLabels QueryLabelsConfig, j
 			Create:     config.Create,
 			Cluster:    config.Cluster,
 			Secure:     config.Secure,
+			SkipVerify: config.SkipVerify,
+			Logger:     logger,
+		})
+		if err != nil {
+			return nil, err
+		}
+	case JOB_TYPE_ETCD:
+		d, err = driver.NewEtcd(driver.EtcdOpts{
+			Hosts:      config.Hosts,
+			Port:       config.Port,
+			Username:   config.Username,
+			Password:   config.Password,
+			Timeout:    config.Timeout,
+			Key:        config.Key,
+			Create:     config.Create,
+			TLS:        config.TLS,
 			SkipVerify: config.SkipVerify,
 			Logger:     logger,
 		})

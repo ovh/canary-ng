@@ -57,6 +57,7 @@ func TestConsulDiscoveryE2E(t *testing.T) {
 		"mongodb":    "mongodb",
 		"clickhouse": "clickhouse",
 		"valkey":     "valkey",
+		"etcd":       "etcd",
 	}
 
 	for driver, address := range backends {
@@ -76,7 +77,7 @@ func TestConsulDiscoveryE2E(t *testing.T) {
 	}
 
 	metric := "canary_ng_jobs"
-	jobs := []string{"postgresql", "mysql", "mongodb", "clickhouse", "valkey"}
+	jobs := []string{"postgresql", "mysql", "mongodb", "clickhouse", "valkey", "etcd"}
 
 	deadline := time.Now().Add(90 * time.Second)
 	for {
