@@ -97,3 +97,19 @@ jobs:
     port: 6379
     key: canary_ng
     create: true
+
+  - name: etcd
+    type: etcd
+    interval: 1
+    query_type: read_write
+    job_per_host: true
+    hosts_discovery:
+      type: consul
+      addresses:
+        - consul:8500
+      interval: 2
+      node_meta:
+        driver: etcd
+    port: 2379
+    key: canary_ng
+    create: true
