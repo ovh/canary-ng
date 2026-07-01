@@ -13,7 +13,7 @@ RUN make
 
 
 # run
-FROM alpine:3.21
+FROM alpine:3.22
 
 COPY --from=builder /usr/src/app/bin/canary-ng /usr/local/bin/canary-ng
 COPY docker-entrypoint.sh /docker-entrypoint.sh
