@@ -457,21 +457,27 @@ func (j *Job) EndMeasurement(queryType string) {
 // Run measures on the job interval until stop is closed. A nil stop channel
 // runs for the lifetime of the process.
 func (j *Job) Run(stop <-chan struct{}) {
-	j.logger.Info("job started")
-	j.Measure()
-	j.logger.Info("measurement performed")
+	j.loop(stop, time.Duration(j.config.Interval)*time.Second)
+}
 
-	ticker := time.NewTicker(time.Duration(j.config.Interval) * time.Second)
-	defer ticker.Stop()
+// The interval is a cooldown applied after each measurement completes, not a
+// fixed tick rate. A ticker would coalesce ticks that elapse during a slow
+// measurement and fire the next one immediately, reconnecting back to back and
+// storming a process-per-connection backend such as PostgreSQL.
+func (j *Job) loop(stop <-chan struct{}, interval time.Duration) {
+	j.logger.Info("job started")
 
 	for {
+		j.Measure()
+		j.logger.Info("measurement performed")
+
+		timer := time.NewTimer(interval)
 		select {
 		case <-stop:
+			timer.Stop()
 			j.logger.Info("job stopped")
 			return
-		case <-ticker.C:
-			j.Measure()
-			j.logger.Info("measurement performed")
+		case <-timer.C:
 		}
 	}
 }
