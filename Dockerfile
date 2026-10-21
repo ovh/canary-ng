@@ -1,5 +1,5 @@
 # builder
-FROM golang:1.26-alpine AS builder
+FROM golang:1.27-alpine AS builder
 
 # install git to execute git command within Makefile
 RUN apk add make git
