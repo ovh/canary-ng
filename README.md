@@ -248,7 +248,8 @@ Discovery runs periodically: hosts that appear are added and hosts that
 disappear are removed without restarting the application. Use `interval` to
 control how often discovery runs (defaults to 60 seconds). When discovery fails
 or returns no host, the currently running jobs are kept so a transient outage
-does not interrupt monitoring.
+does not interrupt monitoring. Discovered hostnames that fail DNS resolution
+are ignored with a warning, the other hosts are still monitored.
 
 Example:
 
