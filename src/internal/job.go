@@ -152,16 +152,18 @@ func NewJob(config JobConfig, metrics *Metrics, queryLabels QueryLabelsConfig, j
 		} else {
 			hosts := []string{}
 			for _, host := range config.Hosts {
-				if net.ParseIP(host) == nil {
-					slog.Debug("resolving hostname", slog.Any("host", host))
-					resolvedHosts, err := net.LookupIP(host)
-					if err != nil {
-						return nil, err
-					}
-					for _, resolvedHost := range resolvedHosts {
-						slog.Debug("resolved host", slog.Any("host", host), slog.Any("resolved", resolvedHost))
-						hosts = append(hosts, resolvedHost.String())
-					}
+				if net.ParseIP(host) != nil {
+					hosts = append(hosts, host)
+					continue
+				}
+				slog.Debug("resolving hostname", slog.Any("host", host))
+				resolvedHosts, err := net.LookupIP(host)
+				if err != nil {
+					return nil, err
+				}
+				for _, resolvedHost := range resolvedHosts {
+					slog.Debug("resolved host", slog.Any("host", host), slog.Any("resolved", resolvedHost))
+					hosts = append(hosts, resolvedHost.String())
 				}
 			}
 			config.Hosts = hosts
@@ -339,7 +341,29 @@ func DiscoverHosts(config DiscoveryConfig) (hosts []string, err error) {
 	if err != nil {
 		return []string{}, err
 	}
-	return hosts, nil
+	return filterResolvableHosts(hosts, net.LookupHost), nil
+}
+
+// Discovery backends such as consul can return stale or malformed entries,
+// skipping them keeps the remaining hosts monitored instead of failing the job
+func filterResolvableHosts(hosts []string, lookup func(string) ([]string, error)) []string {
+	valid := make([]string, 0, len(hosts))
+	for _, host := range hosts {
+		if host == "" {
+			slog.Warn("ignoring empty discovered host")
+			continue
+		}
+		if net.ParseIP(host) != nil {
+			valid = append(valid, host)
+			continue
+		}
+		if _, err := lookup(host); err != nil {
+			slog.Warn("ignoring discovered host with invalid DNS entry", slog.String("host", host), slog.Any("error", err))
+			continue
+		}
+		valid = append(valid, host)
+	}
+	return valid
 }
 
 func (j *Job) Measure() {
