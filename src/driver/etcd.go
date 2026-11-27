@@ -3,8 +3,11 @@ package driver
 import (
 	"context"
 	"crypto/tls"
+	"crypto/x509"
+	"errors"
 	"fmt"
 	"log/slog"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -27,6 +30,9 @@ type EtcdOpts struct {
 	Create     bool
 	TLS        bool
 	SkipVerify bool
+	CAFile     string
+	CertFile   string
+	KeyFile    string
 	Logger     *slog.Logger
 }
 
@@ -53,11 +59,12 @@ func NewEtcd(opts EtcdOpts) (e *Etcd, err error) {
 		Password:    opts.Password,
 	}
 
-	if opts.TLS || opts.SkipVerify {
-		co.TLS = &tls.Config{}
-		if opts.SkipVerify {
-			co.TLS.InsecureSkipVerify = true
+	if opts.TLS || opts.SkipVerify || opts.CAFile != "" || opts.CertFile != "" || opts.KeyFile != "" {
+		tlsConfig, err := buildEtcdTLSConfig(opts)
+		if err != nil {
+			return nil, err
 		}
+		co.TLS = tlsConfig
 	}
 
 	var logger *slog.Logger
@@ -72,6 +79,35 @@ func NewEtcd(opts EtcdOpts) (e *Etcd, err error) {
 		co:     co,
 		logger: logger,
 	}, nil
+}
+
+func buildEtcdTLSConfig(opts EtcdOpts) (*tls.Config, error) {
+	tlsConfig := &tls.Config{InsecureSkipVerify: opts.SkipVerify}
+
+	if opts.CAFile != "" {
+		ca, err := os.ReadFile(opts.CAFile)
+		if err != nil {
+			return nil, fmt.Errorf("read ca file: %w", err)
+		}
+		pool := x509.NewCertPool()
+		if !pool.AppendCertsFromPEM(ca) {
+			return nil, fmt.Errorf("no certificate found in ca file %s", opts.CAFile)
+		}
+		tlsConfig.RootCAs = pool
+	}
+
+	if (opts.CertFile == "") != (opts.KeyFile == "") {
+		return nil, errors.New("cert_file and key_file must be set together")
+	}
+	if opts.CertFile != "" {
+		cert, err := tls.LoadX509KeyPair(opts.CertFile, opts.KeyFile)
+		if err != nil {
+			return nil, fmt.Errorf("load client certificate: %w", err)
+		}
+		tlsConfig.Certificates = []tls.Certificate{cert}
+	}
+
+	return tlsConfig, nil
 }
 
 // etcd endpoints expect a port

@@ -225,6 +225,59 @@ services:
       - '{"Node":"canary-etcd","Address":"etcd","NodeMeta":{"driver":"etcd"}}'
       - "http://consul:8500/v1/catalog/register"
 
+  etcd-tls-certs:
+    container_name: canary-ng-etcd-tls-certs
+    image: alpine:3.24
+    restart: "no"
+    volumes:
+      - ./docker/tls/etcd:/certs
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - |
+        apk add --no-cache openssl >/dev/null
+        cd /certs
+        [ -f ca.crt ] && exit 0
+        openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -nodes \
+          -days 3650 -subj /CN=canary-ng-e2e-ca -keyout ca.key -out ca.crt
+        for name in server root client; do
+          case $$name in
+            server) cn=etcd-tls; ext="subjectAltName=DNS:etcd-tls,DNS:localhost,IP:127.0.0.1\nextendedKeyUsage=serverAuth" ;;
+            root) cn=root; ext="extendedKeyUsage=clientAuth" ;;
+            client) cn=canary-ng-client; ext="extendedKeyUsage=clientAuth" ;;
+          esac
+          openssl req -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -nodes \
+            -subj /CN=$$cn -keyout $$name.key -out $$name.csr
+          printf "$$ext\n" > $$name.ext
+          openssl x509 -req -in $$name.csr -CA ca.crt -CAkey ca.key -CAcreateserial \
+            -days 3650 -extfile $$name.ext -out $$name.crt
+        done
+        rm -f *.csr *.ext ca.srl
+        chmod 644 *
+
+  # Requires client certificates like a production cluster, the e2e test enables auth
+  etcd-tls:
+    container_name: canary-ng-etcd-tls
+    image: quay.io/coreos/etcd:v3.5.17
+    depends_on:
+      etcd-tls-certs:
+        condition: service_completed_successfully
+    volumes:
+      - ./docker/tls/etcd:/certs:ro
+    environment:
+      ETCD_LISTEN_CLIENT_URLS: https://0.0.0.0:2379
+      ETCD_ADVERTISE_CLIENT_URLS: https://etcd-tls:2379
+      ETCD_CERT_FILE: /certs/server.crt
+      ETCD_KEY_FILE: /certs/server.key
+      ETCD_TRUSTED_CA_FILE: /certs/ca.crt
+      ETCD_CLIENT_CERT_AUTH: "true"
+    ports:
+      - "2381:2379"
+    healthcheck:
+      test: ["CMD", "etcdctl", "--endpoints=https://127.0.0.1:2379", "--cacert=/certs/ca.crt", "--cert=/certs/root.crt", "--key=/certs/root.key", "endpoint", "health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   canary-ng:
     container_name: canary-ng
     build:

@@ -203,6 +203,9 @@ func NewJob(config JobConfig, metrics *Metrics, queryLabels QueryLabelsConfig, j
 			Create:     config.Create,
 			TLS:        config.TLS,
 			SkipVerify: config.SkipVerify,
+			CAFile:     config.CAFile,
+			CertFile:   config.CertFile,
+			KeyFile:    config.KeyFile,
 			Logger:     logger,
 		})
 		if err != nil {
