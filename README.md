@@ -184,6 +184,9 @@ To import it into an existing Grafana:
 * `password` (string): password used for authentication
 * `tls` (bool): use TLS for the connection
 * `skip_verify` (bool): skip verification of the TLS certificate
+* `ca_file` (string): path to the CA certificate used to verify the server, enables TLS
+* `cert_file` (string): path to the client certificate, enables TLS, requires `key_file`
+* `key_file` (string): path to the client private key, enables TLS, requires `cert_file`
 * `key` (string): name of the key
 * `create` (bool): write to key if it doesn't exist (used by `read` queries)
 

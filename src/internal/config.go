@@ -64,6 +64,9 @@ type JobConfig struct {
 	TLS                  bool              `yaml:"tls"`
 	TLSInsecure          bool              `yaml:"tls_insecure"`
 	TLSConfig            string            `yaml:"tls_config"`
+	CAFile               string            `yaml:"ca_file"`
+	CertFile             string            `yaml:"cert_file"`
+	KeyFile              string            `yaml:"key_file"`
 	AllowNativePasswords bool              `yaml:"allow_native_passwords"`
 	MasterSet            string            `yaml:"master_set"`
 }
